@@ -121,7 +121,7 @@ bool LEVEL::calibrateEnemyArray(ELOC l_elocID )
    ENEMY* l_pEnemy = new (LIFECYCLE_LEVEL) ENEMY(LIFECYCLE_LEVEL);
    l_pEnemy->SetType(ETYP_FLYER);
    l_pEnemy->setPos(1.0f, 1.0f, 10.0f);
-
+/*
    ENEMY* l_pEnemy2 = new (LIFECYCLE_LEVEL) ENEMY(LIFECYCLE_LEVEL);   
    l_pEnemy2->SetType(ETYP_HUNTER);
    l_pEnemy2->setPos(10.0f, 1.0f, 10.0f);
@@ -145,7 +145,7 @@ bool LEVEL::calibrateEnemyArray(ELOC l_elocID )
       hr2message(__LINE__,-1, "LEVEL::calibrateEnemyArray() - cannot insert EXPLOSION into enemy_array ");
       return false;
    }
-
+*/
 
    // -- anhängige Targetlocks löschen
    //

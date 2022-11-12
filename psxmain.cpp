@@ -44,6 +44,8 @@
  *
  */
 
+// -- covering whole architecture of a win32-application-architecture here
+//
 
 #include "stdafx.h"
 #include "resource.h"
@@ -57,6 +59,8 @@ LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 HRESULT CompileShaderFromFile( WCHAR* , LPCSTR , LPCSTR , ID3DBlob** );
+
+DWORD WINAPI UpdaterThreadFunction(void *pParam);
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -111,7 +115,22 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	g_cntFrame = 0;
 	g_dwLastTickCount = GetTickCount();
 
+	g_bKeepUpdaterThread = true;
+	
+	g_hSemaphore = CreateSemaphore(NULL, 1, 1, NULL);
+	if (g_hSemaphore == NULL)
+	{
+		hr2message(__LINE__, -1,  "CreateSemaphore()");
+		return false;
+	}
+
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_D11INIT));
+	if (PSXUpdateGameManagement() == false) return false;
+
+
+	DWORD uiThreadId;
+	HANDLE l_hThread = CreateThread(0, 0, UpdaterThreadFunction, NULL, 0, &uiThreadId);
+
 	// Main message loop
 	while( WM_QUIT != msg.message )
     {
@@ -130,6 +149,11 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 			}
         }
     }		
+	g_bKeepUpdaterThread = false;
+
+	WaitForSingleObjectEx(l_hThread, INFINITE, TRUE);
+	CloseHandle(l_hThread);
+	CloseHandle(g_hSemaphore);
 
 	CleanupDevice();
 
@@ -140,7 +164,24 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	return (int) msg.wParam;
 }
 
+DWORD WINAPI UpdaterThreadFunction(void *pParam)
+{
+	DWORD dwWaitResult;
 
+	while (g_bKeepUpdaterThread)
+	{
+		dwWaitResult = WaitForSingleObject(
+			g_hSemaphore,   // handle to semaphore
+			0L);           // zero-second time-out interval
+
+		if (PSXUpdateGameManagement() == false) return false;
+
+		/*if (g_Player.getGS()->ShallUpdateEnemies())*/
+			
+		SleepEx(10, TRUE);
+	}
+	return 0;
+}
 
 
 

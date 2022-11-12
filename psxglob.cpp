@@ -133,8 +133,12 @@ HANDLE g_hLogFile     = NULL;
 GAME g_game;
 
 DWORD g_dwLastTickCount;
-float g_fElapsedTime;
+//float g_fElapsedTime;
 int g_cntFrame;
+
+bool g_bKeepUpdaterThread;
+HANDLE g_hSemaphore;
+
 DWORD PSXTIMER::m_dwSample[PSXTIMER::m_maxSample] = { 0 };
 int PSXTIMER::m_cntSample = 0;
 int PSXTIMER::m_idxSample = 0;

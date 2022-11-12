@@ -954,13 +954,48 @@ bool GAME::initEquipment()
 //
 bool PSXUpdateGameManagement()
 {
+	HRESULT hr;
+
+	/***************************************************************
+	*							EINGABE
+	***************************************************************/
+	hr = g_didevMouse->GetDeviceState(sizeof(DIMOUSESTATE), &diMouseState);
+	if (hr != 0) {
+		hr2message(__LINE__, hr, "g_didevMouse->GetDeviceState()");
+		return(FALSE);
+	}
+
+	//--- Bei alt+tab INPUTLOST
+	//
+	hr = g_didevKeyboard->GetDeviceState(256, g_arr_cKeystate);
+	if (hr == DIERR_INPUTLOST)
+	{
+		hr = g_didevKeyboard->Acquire();
+		if (hr != 0)
+		{
+			hr2message(__LINE__, hr, "g_didevKeyboard->Acquire()");
+			return(FALSE);
+		}
+
+	}
+	else {
+		if (hr != 0)
+		{
+			hr2message(__LINE__, hr, "g_didevKeyboard->GetDeviceState()");
+			return(FALSE);
+		}
+	}
+
+	/***************************************************************
+	*						VERARBEITUNG
+	***************************************************************/
 	// -- Toggle Debugenemy control
 	//
 	if (g_arr_cKeystate[DIK_D])
 	{
 		if (g_cntKeystateCheckTimer[DIK_D] > 0)
 		{
-			g_cntKeystateCheckTimer[DIK_D] -= g_fElapsedTime;
+			g_cntKeystateCheckTimer[DIK_D] -= 1;
 		}
 		else {
 			g_cntKeystateCheckTimer[DIK_D] = g_maxKeystateCheckTimer;
@@ -987,10 +1022,12 @@ bool PSXUpdateGameManagement()
 		g_cntKeystateCheckTimer[DIK_D] = 0;
 	}
 
+   /* migrated back to main loop 
    if (g_arr_cKeystate[DIK_X] & 0x80)
    {
 	   PostQuitMessage(0);
    }
+   */
 
    
    // -- g_matCameraRotation manipulierbar machen
@@ -1177,9 +1214,9 @@ bool PSXUpdateGameManagement()
       {
          if (g_equipmentArray[l_idxEquipment].m_cntShootDelay > 0)
          {
-            g_equipmentArray[l_idxEquipment].m_cntShootDelay =
-                                          g_equipmentArray[l_idxEquipment].m_cntShootDelay -
-                                          int(g_fElapsedTime);
+			 g_equipmentArray[l_idxEquipment].m_cntShootDelay =
+				 g_equipmentArray[l_idxEquipment].m_cntShootDelay - 1;
+                                          //int(g_fElapsedTime);
 
             if (g_equipmentArray[l_idxEquipment].m_cntShootDelay < 0)
             {
@@ -1208,7 +1245,7 @@ bool PSXUpdateGameManagement()
    {
 	   if (g_cntMousestateCheckTimer[0] > 0)
 	  {
-		   g_cntMousestateCheckTimer[0] -= g_fElapsedTime;
+		   g_cntMousestateCheckTimer[0] -= 1; // g_fElapsedTime;
 	   }
 	   else {
 		   g_cntMousestateCheckTimer[0] = g_maxMousestateCheckTimer;
@@ -1542,7 +1579,7 @@ bool PSXUpdateGameManagement()
    g_fProfileStateArray[PROFILE_ENEMYUPDATE] = GetTickCount() - g_fProfilingMilliSec;
 */
 
-	if (LEVEL::m_dSpaceID)/* && g_Player.getGS()->ShallUpdateEnemies())*/
+   if (LEVEL::m_dSpaceID)/* && g_Player.getGS()->ShallUpdateEnemies())*/
    {
 	   // -- kollision der enemies untereinander
 	   //
@@ -1571,53 +1608,58 @@ bool PSXUpdateGameManagement()
          if (shoot_array[l_idxShoot].Update()==false) return false;
       }
 
-      // -- compressing shootarray: delete zero-timetolive items
-      //    and recalculate cntShoot
-      //
-      g_cntShoot = 0;
-      for (l_idxShoot=0;l_idxShoot<g_maxShoot; l_idxShoot++)
-      {
-         if (shoot_array[l_idxShoot].m_cntTimeToLive > 0)
-         {
-            if (g_cntShoot!=l_idxShoot)
-            {
-               shoot_array[g_cntShoot] = shoot_array[l_idxShoot];
+	  // -- compressing shootarray: delete zero-timetolive items
+	  //    and recalculate cntShoot
+	  //
+	  g_cntShoot = 0;
+	  for (l_idxShoot = 0; l_idxShoot < g_maxShoot; l_idxShoot++)
+	  {
+		  if (shoot_array[l_idxShoot].m_cntTimeToLive > 0)
+		  {
+			  if (g_cntShoot != l_idxShoot)
+			  {
+				  shoot_array[g_cntShoot] = shoot_array[l_idxShoot];
 
-               // -- falls sich der Eintrag fuer die Smartbomb mitverschoben hat
-               //
-					/*
-               if (l_idxShoot == g_equipmentArray[EQUIPMENT_TORPEDO].m_idxShootSingleton)
-               {
-                  g_equipmentArray[EQUIPMENT_TORPEDO].m_idxShootSingleton = g_cntShoot;
-               }
+				  // -- falls sich der Eintrag fuer die Smartbomb mitverschoben hat
+				  //
+					   /*
+				  if (l_idxShoot == g_equipmentArray[EQUIPMENT_TORPEDO].m_idxShootSingleton)
+				  {
+					 g_equipmentArray[EQUIPMENT_TORPEDO].m_idxShootSingleton = g_cntShoot;
+				  }
 
-               if (l_idxShoot == g_equipmentArray[EQUIPMENT_MISSILE].m_idxShootSingleton)
-               {
-                  g_equipmentArray[EQUIPMENT_MISSILE].m_idxShootSingleton = g_cntShoot;
-               }
+				  if (l_idxShoot == g_equipmentArray[EQUIPMENT_MISSILE].m_idxShootSingleton)
+				  {
+					 g_equipmentArray[EQUIPMENT_MISSILE].m_idxShootSingleton = g_cntShoot;
+				  }
 
-               if (l_idxShoot == g_equipmentArray[EQUIPMENT_MINE].m_idxShootSingleton)
-               {
-                  g_equipmentArray[EQUIPMENT_MINE].m_idxShootSingleton = g_cntShoot;
-               }
-					*/
+				  if (l_idxShoot == g_equipmentArray[EQUIPMENT_MINE].m_idxShootSingleton)
+				  {
+					 g_equipmentArray[EQUIPMENT_MINE].m_idxShootSingleton = g_cntShoot;
+				  }
+					   */
 
-            }
-            g_cntShoot++;
-         }
-      }
+			  }
+			  g_cntShoot++;
+		  }
+	  }
 
-      // -- zero out the rest
-      //
-      if (g_cntShoot<g_maxShoot)
-      {
-         memset(shoot_array+g_cntShoot, 0, sizeof(SHOOT)*(g_maxShoot-g_cntShoot));
-      }
+	  // -- zero out the rest
+	  //
+	  if (g_cntShoot < g_maxShoot)
+	  {
+		  memset(shoot_array + g_cntShoot, 0, sizeof(SHOOT)*(g_maxShoot - g_cntShoot));
+	  }
    }
 
+   if (g_bWriteLogFileInLoop)
+   {
+	   WriteLogFile("invoking dWorldQuickStep()\n");
+   }
 
+   if (LEVEL::m_iWorldID) dWorldQuickStep(LEVEL::m_iWorldID, 0.5f); //0.4f);
 
-	return true;
+   return true;
 }
 
 bool GAME::handleKey(WORD wordKey)
@@ -1835,7 +1877,7 @@ bool SHOOT::Update()
       }
       */
 
-      m_vPos = m_vPos + m_vStep * g_fElapsedTime * 0.06f;
+      m_vPos = m_vPos + m_vStep * 0.06f;
 
       m_fViewRotation1 = m_fViewRotation1 + 0.2f;
       m_fScale = m_fScale * 0.9f;

@@ -1282,34 +1282,34 @@ bool PSXRunFullScreen()
 {
 	HRESULT hr;
 
-	/***************************************************************
-	*							EINGABE
-	***************************************************************/
-	hr = g_didevMouse->GetDeviceState(sizeof(DIMOUSESTATE), &diMouseState);
-	if (hr != 0) {
-		hr2message(__LINE__,hr,"g_didevMouse->GetDeviceState()");
-		return(FALSE);
-	}
+	///***************************************************************
+	//*							EINGABE
+	//***************************************************************/
+	//hr = g_didevMouse->GetDeviceState(sizeof(DIMOUSESTATE), &diMouseState);
+	//if (hr != 0) {
+	//	hr2message(__LINE__,hr,"g_didevMouse->GetDeviceState()");
+	//	return(FALSE);
+	//}
 
-	//--- Bei alt+tab INPUTLOST
-	//
-	hr = g_didevKeyboard->GetDeviceState(256, g_arr_cKeystate);
-	if (hr == DIERR_INPUTLOST)
-	{
-		hr = g_didevKeyboard->Acquire();
-		if (hr != 0)
-		{
-			hr2message(__LINE__,hr,"g_didevKeyboard->Acquire()");
-			return(FALSE);
-		}
+	////--- Bei alt+tab INPUTLOST
+	////
+	//hr = g_didevKeyboard->GetDeviceState(256, g_arr_cKeystate);
+	//if (hr == DIERR_INPUTLOST)
+	//{
+	//	hr = g_didevKeyboard->Acquire();
+	//	if (hr != 0)
+	//	{
+	//		hr2message(__LINE__,hr,"g_didevKeyboard->Acquire()");
+	//		return(FALSE);
+	//	}
 
-	}else{
-		if (hr != 0)
-		{
-			hr2message(__LINE__,hr,"g_didevKeyboard->GetDeviceState()");
-			return(FALSE);
-		}
-	}
+	//}else{
+	//	if (hr != 0)
+	//	{
+	//		hr2message(__LINE__,hr,"g_didevKeyboard->GetDeviceState()");
+	//		return(FALSE);
+	//	}
+	//}
 
 	/***************************************************************
 	*						VERARBEITUNG
@@ -1317,10 +1317,15 @@ bool PSXRunFullScreen()
 
 	// -- gamebezogene Eingabe+Verarbeitung
 	//
-	if (PSXUpdateGameManagement() == false) return false;
+	// migrated to UpdaterThreadFunction()
+	//if (PSXUpdateGameManagement() == false) return false;
+	if (g_arr_cKeystate[DIK_X] & 0x80)
+	{
+		PostQuitMessage(0);
+	}
 
 	/*if (g_Player.getGS()->ShallUpdateEnemies())*/
-	{
+	/*
 		if (g_bWriteLogFileInLoop) 
 		{
 			WriteLogFile("invoking dWorldQuickStep()\n");
@@ -1331,7 +1336,7 @@ bool PSXRunFullScreen()
 			if (LEVEL::m_iWorldID) dWorldQuickStep(LEVEL::m_iWorldID, g_fElapsedTime * 0.05f); //0.4f);
 		}
 
-	}
+	*/
 
 	/***************************************************************
 	*                        AUSGABE 
@@ -1427,35 +1432,35 @@ bool PSXRunFullScreen()
                 */
          }
 		}
-   	g_dwLastTickCount = l_dwNewTickCount;
+   		g_dwLastTickCount = l_dwNewTickCount;
 
-      // -- Durchschnitt der Samplekette ermitteln
-      //     
-      g_fElapsedTime = 0.0f;
+ //     // -- Durchschnitt der Samplekette ermitteln
+ //     //     
+ //     g_fElapsedTime = 0.0f;
 
-      
-      float l_fSampleSum = 0.0f;
+ //     
+ //     float l_fSampleSum = 0.0f;
 
-      // -- überhaupt erstmal Werte sammeln
-      //
-      if (PSXTIMER::m_cntSample > 0)
-      {
+ //     // -- überhaupt erstmal Werte sammeln
+ //     //
+ //     if (PSXTIMER::m_cntSample > 0)
+ //     {
 
-      
-          for (int l_idxSample = 0; l_idxSample < PSXTIMER::m_cntSample; l_idxSample++)
-          {
-          
-              l_fSampleSum = l_fSampleSum + float(PSXTIMER::m_dwSample[l_idxSample]);
-              
-          }
-      
-          g_fElapsedTime = float(int(l_fSampleSum / float(PSXTIMER::m_cntSample) + 0.5f));
-      }
-      
+ //     
+ //         for (int l_idxSample = 0; l_idxSample < PSXTIMER::m_cntSample; l_idxSample++)
+ //         {
+ //         
+ //             l_fSampleSum = l_fSampleSum + float(PSXTIMER::m_dwSample[l_idxSample]);
+ //             
+ //         }
+ //     
+ //         g_fElapsedTime = float(int(l_fSampleSum / float(PSXTIMER::m_cntSample) + 0.5f));
+ //     }
+ //     
 
-		//PSXPrintf(__LINE__, debugausgabe, g_maxDebugAusgabe, "g_fElapsedTime = %f",g_fElapsedTime);
+	//	//PSXPrintf(__LINE__, debugausgabe, g_maxDebugAusgabe, "g_fElapsedTime = %f",g_fElapsedTime);
 
-     
+ //    
 	}
 
 	// -- fps: Frames per Second ausrechnen
@@ -1471,10 +1476,10 @@ bool PSXRunFullScreen()
 		g_iFramesPerSec++;
 	}
 	*/
-	if (g_fElapsedTime <= 0.0f)
-	{
-		g_fElapsedTime = 1.0f;
-	}
+	//if (g_fElapsedTime <= 0.0f)
+	//{
+	//	g_fElapsedTime = 1.0f;
+	//}
 
 	g_cntFrame = g_cntFrame + 1;
 

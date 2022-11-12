@@ -2913,7 +2913,7 @@ bool ENEMY::TreatAsPlayer()
       case ENACT_LEAVEDOCK:
          if(m_iActionTimer>0)
          {
-            m_iActionTimer = m_iActionTimer - int(g_fElapsedTime);
+            m_iActionTimer = m_iActionTimer - 1;
          }else{
             m_Action = ENACT_DONOTHING;
          }
@@ -2932,7 +2932,7 @@ bool ENEMY::TreatAsPlayer()
          //
          if(m_iActionTimer>0)
          {
-            m_iActionTimer = m_iActionTimer - int(g_fElapsedTime);
+            m_iActionTimer = m_iActionTimer - 1;
          }else{
             m_Action = ENACT_DONOTHING;
          }
@@ -3178,7 +3178,7 @@ bool ENEMY::controlledByUser()
    //
    float l_fScale;
    //l_fScale = 0.00001f;// 0.001f;
-   l_fScale = 0.0007f / g_fElapsedTime;
+   l_fScale = 0.01f; // 0.0007f; // g_fElapsedTime;
 
 
    l_fTempRotation1 = float(diMouseState.lX) * l_fScale;
@@ -3977,7 +3977,7 @@ bool ENEMY::handleDefaultSmallShip(float l_fFightSpeed,
             { 
                // --- laufende phase abwarten
                //
-               m_iActionTimer = m_iActionTimer - int(g_fElapsedTime);
+				m_iActionTimer = m_iActionTimer - 1;// int(g_fElapsedTime);
          
             }else{
          
@@ -4149,7 +4149,7 @@ bool ENEMY::handleDefaultSmallShip(float l_fFightSpeed,
             {
                //PSXVECTOR l_vPlayerStep;
 
-               m_iActionTimer = m_iActionTimer - int(g_fElapsedTime);
+				m_iActionTimer = m_iActionTimer - 1;// int(g_fElapsedTime);
 
                m_fViewRotation1 = 0.0f;
                if (g_ehdlBuf.m_vDest.y > 0)
@@ -4194,7 +4194,7 @@ bool ENEMY::handleDefaultSmallShip(float l_fFightSpeed,
 
             if(m_iActionTimer>0)
             {
-               m_iActionTimer = m_iActionTimer - int(g_fElapsedTime);
+				m_iActionTimer = m_iActionTimer - 1;// int(g_fElapsedTime);
             }else{
                // -- entscheidung forcieren, wenn ausser reichweite, sonst ausrotieren
                //
@@ -4227,7 +4227,7 @@ bool ENEMY::handleDefaultSmallShip(float l_fFightSpeed,
         case ENACT_BANKROTATION:
             if(m_iActionTimer>0)
             {
-               m_iActionTimer = m_iActionTimer - int(g_fElapsedTime);
+				m_iActionTimer = m_iActionTimer - 1; // int(g_fElapsedTime);
                //m_fViewRotation1 = 0.1f;
             }else{
                detonate();
@@ -4332,7 +4332,7 @@ bool ENEMY::handleDefaultSmallShip(float l_fFightSpeed,
             //
             if(m_iActionTimer>0)
             {
-               m_iActionTimer = m_iActionTimer - int(g_fElapsedTime);
+				m_iActionTimer = m_iActionTimer - 1; // int(g_fElapsedTime);
             }else{
    
                // -- entscheidung forcieren, wenn ausser reichweite, sonst ausrotieren
@@ -5988,10 +5988,10 @@ bool ENEMY::checkIfHitByShoot(int l_idxShoot, float l_fLenPow2)
                XMVECTOR l_vDirection;
             
                float x,y,z;
-	       XMVECTOR l_vShoot = shoot_array[l_idxShoot].m_vPos - m_vPos;
+			   XMVECTOR l_vShoot = shoot_array[l_idxShoot].m_vPos - m_vPos;
       
                XMMATRIX l_matEnemyTrp = XMMatrixTranspose(m_Mat);
-	       l_vPos = XMVector3Transform(l_vShoot, l_matEnemyTrp);
+			   l_vPos = XMVector3Transform(l_vShoot, l_matEnemyTrp);
                //l_vPos.x = (l_pMat->_11*x + l_pMat->_12*y + l_pMat->_13*z);
                //l_vPos.y = (l_pMat->_21*x + l_pMat->_22*y + l_pMat->_23*z);
                //l_vPos.z = (l_pMat->_31*x + l_pMat->_32*y + l_pMat->_33*z);
@@ -6001,7 +6001,7 @@ bool ENEMY::checkIfHitByShoot(int l_idxShoot, float l_fLenPow2)
                //l_fLenPow2 = pow2(x)+ pow2(y)+ pow2(z); =>
                //l_fLength = sqrt(l_fLenPow2);           => l_fShootStepLength 
    
-	       l_vStep =  XMVector3Transform( shoot_array[l_idxShoot].m_vStep, l_matEnemyTrp);
+			   l_vStep = XMVector3Transform(shoot_array[l_idxShoot].m_vStep, l_matEnemyTrp);
                //l_vStep.x = (l_pMat->_11*x + l_pMat->_12*y + l_pMat->_13*z);
                //l_vStep.y = (l_pMat->_21*x + l_pMat->_22*y + l_pMat->_23*z);
                //l_vStep.z = (l_pMat->_31*x + l_pMat->_32*y + l_pMat->_33*z);
@@ -6026,7 +6026,7 @@ bool ENEMY::checkIfHitByShoot(int l_idxShoot, float l_fLenPow2)
                                     &l_fIntersectAt,
                                     &l_pfaceinfIntersect ) == false) return false;
       
-            if (l_fIntersectAt<= (g_fElapsedTime) && l_fIntersectAt>=0.0f && l_bIntersectValid)
+            if (l_fIntersectAt<= (1.0f) && l_fIntersectAt>=0.0f && l_bIntersectValid)
             {
                XMVECTORF32 l_vFaceNormal = { l_pfaceinfIntersect->vNormal.x,
                                             l_pfaceinfIntersect->vNormal.y,

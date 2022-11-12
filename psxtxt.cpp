@@ -361,7 +361,7 @@ bool TEXTURE::readFromHDD()
    HRESULT hr;
    DDSURFACEDESC2     l_ddsdProxy   = {0};
 
-   HANDLE l_hBmpFile;
+   HANDLE l_hBmpFile = 0;
 
    unsigned long l_ulFileLength, l_ulFileRest;
    char l_cCompletePath[200];
@@ -448,7 +448,7 @@ bool TEXTURE::readFromHDD()
 	  // -- Reading DDSURFACEDESC
 	  //
 	  {
-		  ULONG l_dwBytesRead;
+		  ULONG l_dwBytesRead;          
 		  ReadFile( l_hBmpFile, (void*)&l_ddsdProxy, sizeof(l_ddsdProxy), &l_dwBytesRead, NULL);
 
 		  if (l_ddsdProxy.size != sizeof(DDSURFACEDESC2))
